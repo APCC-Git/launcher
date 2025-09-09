@@ -24,6 +24,9 @@ const CDLauncher: React.FC = () => {
   // ホバーしてるアプリ
   const [highlitedApp, setHightlitedApp] = useState<Game | null>(null);
 
+  // エラーのダイアログが表示されているかどうか
+  const [errorShow, setErrorShow] = useState(false);
+
   // アプリクリック時の処理
   const handleAppClick = (app: Game) => {
     // チェッカーの色をアプリの色に
@@ -39,6 +42,14 @@ const CDLauncher: React.FC = () => {
       "var(--color-gray-400)"
     );
     setSelectedApp(null);
+  };
+
+  // エラーのダイアログを表示する処理
+  const showErrorDialog = () => {
+    setErrorShow(true);
+    setTimeout(() => {
+      setErrorShow(false);
+    }, LAUNCHER_CONFIG.dialogShowDuration);
   };
 
   // =========== Rustとやり取りするための処理 ===========
@@ -87,6 +98,7 @@ const CDLauncher: React.FC = () => {
       // Rust側でErrが返された場合、catchブロックでエラーメッセージを受け取る
       setFeedback({ type: "error", message: String(err) });
       setIsAppRunning(false);
+      showErrorDialog(); // エラーダイアログを表示
       console.log(err);
     } finally {
       // 成功・失敗にかかわらず、ローディング状態を解除
@@ -119,13 +131,6 @@ const CDLauncher: React.FC = () => {
           }`}
         />
       </div>
-
-      {/* ジャケット */}
-      {/* <div
-        className={`jacket absolute top-0 left-0 h-[95vh] w-[95vh] bg-gray-100 rounded-r-sm z-100 mt-[2.5vh] transition-all duration-300 ease-in-out ${
-          selectedApp ? "-translate-x-[100%]" : "-translate-x-[80vh]"
-        }`}
-      ></div> */}
 
       {/* ゲーム選択画面 */}
       <div
@@ -184,7 +189,7 @@ const CDLauncher: React.FC = () => {
       {/* ゲーム詳細画面 */}
       {selectedApp && (
         <div
-          className={`absolute top-0 left-0 z-10 w-full h-[100vh] duration-300 transition-opacity ${
+          className={`absolute top-0 left-0 z-40 w-full h-[100vh] duration-300 transition-opacity ${
             !selectedApp ? "opacity-0" : "opacity-100"
           }`}
         >
@@ -225,6 +230,13 @@ const CDLauncher: React.FC = () => {
                 </div>
               </main>
             </div>
+          </div>
+          <div
+            className={`absolute bottom-8 right-8 rounded-2xl p-4 bg-white/50 backdrop-blur-xl outline-4 outline-red-500 transition-opacity duration-300 ease-in-out ${
+              errorShow ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            {feedback?.message}
           </div>
         </div>
       )}

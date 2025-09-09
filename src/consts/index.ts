@@ -10,6 +10,7 @@ if (import.meta.env.MODE === "development") {
 
 const LAUNCHER_CONFIG = {
   title: "APCC 2025ゲームCDランチャー",
+  dialogShowDuration: 5000, // エラーメッセージを表示する時間 (ms)
   cd: {
     // 表示するCDの設定
     image: "/CD.jpg", // CDのジャケット画像
