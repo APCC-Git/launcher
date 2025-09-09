@@ -36,6 +36,9 @@ const CDLauncher: React.FC = () => {
 
   // 戻るボタンクリック時の処理
   const handleBackButtonClick = () => {
+    if (isAppRunning || isAppLoading) return;
+    setHightlitedApp(null);
+    setErrorShow(false);
     // チェッカーの色を戻す
     document.documentElement.style.setProperty(
       "--cheker",
@@ -231,8 +234,9 @@ const CDLauncher: React.FC = () => {
               </main>
             </div>
           </div>
+          {/* エラーメッセージ */}
           <div
-            className={`absolute bottom-8 right-8 rounded-2xl p-4 bg-white/50 backdrop-blur-xl outline-4 outline-red-500 transition-opacity duration-300 ease-in-out ${
+            className={`absolute bottom-8 right-8 rounded-2xl p-4 bg-white/50 backdrop-blur-xl outline-2 outline-red-500 transition-opacity duration-300 ease-in-out ${
               errorShow ? "opacity-100" : "opacity-0"
             }`}
           >
