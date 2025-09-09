@@ -1,54 +1,39 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
-import { apps, launcherSettings } from "./consts";
-import { App } from "./types/App";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
+
+import { GAMES, LAUNCHER_CONFIG } from "./consts";
+import type { Game } from "./types/Game";
+
+import { CD } from "./components/CD";
+import { Background } from "./components/Background";
 
 // 表示するフィードバックメッセージの型
 interface Feedback {
-  type: "success" | "error";
+  type: "success" | "error" | "info";
   message: string;
 }
 
-// 定数
-const CONFIG = {
-  cd: {
-    diameterVH: 90, // CDの直径 (vh)
-    rotationSpeed: 0.5, // スクロールに対する回転倍率
-    holeSize: 120, // 中央の穴の直径 (px)
-    innerHoleSize: 80, // 内側の穴の直径 (px)
-    trackCount: 10, // トラックの本数
-    trackOffset: 15, // 最初のトラックまでの距離 (px)
-    trackSpacing: 8, // トラック間隔 (px)
-  },
-  layout: {
-    centerOffsetXRatio: 0.15, // 中心Xのオフセット (画面左端からの割合)
-    angleRangeDeg: 50, // アプリ配置の角度範囲（度数）
-    cardLeftOffset: 40, // 各カードのCDの周からのオフセット
-    cardSpacing: 120, // カード同士の弧の距離 (px)
-    startAngleDeg: -40, // 並べ始める基準角度（左端）
-  },
-};
-
 const CDLauncher: React.FC = () => {
-  const [scrollY, setScrollY] = useState<number>(0);
-  const [selectedApp, setSelectedApp] = useState<App | null>(null);
+  // =========== UI周りの処理  ===========
 
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
+  // 選択されたアプリ (画面遷移)
+  const [selectedApp, setSelectedApp] = useState<Game | null>(null);
 
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
+  // ホバーしてるアプリ
+  const [highlitedApp, setHightlitedApp] = useState<Game | null>(null);
 
-  const handleAppClick = (app: App) => {
+  // アプリクリック時の処理
+  const handleAppClick = (app: Game) => {
+    // チェッカーの色をアプリの色に
     document.documentElement.style.setProperty("--cheker", app.color);
     setSelectedApp(app);
   };
 
+  // 戻るボタンクリック時の処理
   const handleBackButtonClick = () => {
+    // チェッカーの色を戻す
     document.documentElement.style.setProperty(
       "--cheker",
       "var(--color-gray-400)"
@@ -56,57 +41,65 @@ const CDLauncher: React.FC = () => {
     setSelectedApp(null);
   };
 
-  // ローディング状態を管理するためのstate
-  const [isLoading, setIsLoading] = useState(false);
-  // バックエンドからの結果を表示するためのstate
+  // =========== Rustとやり取りするための処理 ===========
+
+  // ローディング状態
+  const [isAppLoading, setIsLoading] = useState(false);
+  //起動したアプリが実行中かどうか
+  const [isAppRunning, setIsAppRunning] = useState(false);
+  // バックエンドからの結果
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
+  // アプリ終了のイベントリスナーのセットアップ
+  useEffect(() => {
+    // 'app-terminated' イベントを購読
+    const unlisten = listen<string>("app-terminated", (event) => {
+      console.log(`App terminated:`, event.payload);
+      // ここで終了したアプリのファイル名（event.payload）に応じてstateを更新
+      setIsAppRunning(false);
+      setFeedback({
+        type: "info",
+        message: `'${event.payload}'が終了しました。`,
+      });
+    });
+
+    // コンポーネントがアンマウントされる時にリスナーを解除
+    return () => {
+      unlisten.then((f) => f());
+    };
+  }, []); // コンポーネントのマウント時に一度だけ実行
+
+  // アプリの起動処理
   async function invokeApp(fileName: string) {
     // 既に何らかの処理が実行中の場合は何もしない
-    if (isLoading) return;
+    if (isAppLoading || isAppRunning) return;
 
-    setIsLoading(true);
+    setIsLoading(true); // ローディング状態に
     setFeedback(null); // 前回のメッセージをクリア
 
     try {
       // Rustのコマンドを呼び出し、成功メッセージを受け取る
       const successMessage = await invoke("invoke_app", { fileName });
       setFeedback({ type: "success", message: String(successMessage) });
-    } catch (errorMessage) {
+      setIsAppRunning(true);
+      console.log(successMessage);
+    } catch (err) {
       // Rust側でErrが返された場合、catchブロックでエラーメッセージを受け取る
-      setFeedback({ type: "error", message: String(errorMessage) });
+      setFeedback({ type: "error", message: String(err) });
+      setIsAppRunning(false);
+      console.log(err);
     } finally {
       // 成功・失敗にかかわらず、ローディング状態を解除
       setIsLoading(false);
+      console.log(feedback);
     }
   }
 
-  // CDの回転角度を計算
-  const cdRotation = scrollY * CONFIG.cd.rotationSpeed;
-
   return (
     <div className="h-[100vh] bg-background overflow-x-hidden font-shin-retro">
-      {/* 背景 */}
-      <div className="absolute flex flex-col items-center justify-between top-0 left-0 w-full h-full">
-        <div
-          className="w-full"
-          style={{
-            maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
-          }}
-        >
-          <div className="w-full h-[60px] bg-checker"></div>
-          <div className="w-full h-[60px] checker"></div>
-        </div>
-        <div
-          className="w-full"
-          style={{
-            maskImage: "linear-gradient(to top, black 20%, transparent 90%)",
-          }}
-        >
-          <div className="w-full h-[60px] checker"></div>
-          <div className="w-full h-[60px] bg-checker"></div>
-        </div>
-      </div>
+      {/* 背景 - チェッカー */}
+      <Background />
+
       {/* CD */}
       <div
         className={`fixed z-20 h-screen flex items-center justify-center pointer-events-none transition-all duration-300 ease-in-out ${
@@ -116,105 +109,79 @@ const CDLauncher: React.FC = () => {
         }
           `}
       >
-        <div className="relative">
-          {/* CDの外側 */}
+        <CD
+          config={LAUNCHER_CONFIG.cd}
+          cdImage={LAUNCHER_CONFIG.cd.image}
+          className={`transition-all duration-300 ease-in-out ${
+            isAppRunning && LAUNCHER_CONFIG.cd.spinWhileRunning
+              ? "animate-spin-slow"
+              : ""
+          }`}
+        />
+      </div>
+
+      {/* ジャケット */}
+      {/* <div
+        className={`jacket absolute top-0 left-0 h-[95vh] w-[95vh] bg-gray-100 rounded-r-sm z-100 mt-[2.5vh] transition-all duration-300 ease-in-out ${
+          selectedApp ? "-translate-x-[100%]" : "-translate-x-[80vh]"
+        }`}
+      ></div> */}
+
+      {/* ゲーム選択画面 */}
+      <div
+        className={`absolute top-0 left-0 z-10 w-full h-[100vh] duration-300 transition-opacity ${
+          selectedApp ? "opacity-0" : "opacity-100"
+        }`}
+      >
+        <div className="w-full h-[100vh] pl-[65vh] flex flex-col items-center justify-center gap-3 pt-[10vh] pb-[3vh]">
+          <div className="text-4xl font-bold">{LAUNCHER_CONFIG.title}</div>
           <div
-            className="rounded-full bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 shadow-2xl"
+            className="w-full flex-1 overflow-auto overflow-x-hidden"
             style={{
-              width: `${CONFIG.cd.diameterVH}vh`,
-              height: `${CONFIG.cd.diameterVH}vh`,
-              transform: `rotate(${cdRotation}deg)`,
-              transition: "transform 0.1s ease-out",
+              maskImage: "linear-gradient(to bottom, black, 90%, transparent)",
             }}
           >
-            {/* CD中央の穴 */}
-            <div
-              className="absolute top-1/2 left-1/2 bg-black rounded-full shadow-inner"
-              style={{
-                width: CONFIG.cd.holeSize,
-                height: CONFIG.cd.holeSize,
-                transform: "translate(-50%, -50%)",
-              }}
-            >
-              <div
-                className="absolute top-1/2 left-1/2 bg-gray-300 rounded-full"
-                style={{
-                  width: CONFIG.cd.innerHoleSize,
-                  height: CONFIG.cd.innerHoleSize,
-                  transform: "translate(-50%, -50%)",
-                }}
-              ></div>
-            </div>
-
-            {/* CDの反射効果 */}
-            <div className="absolute inset-0 rounded-full bg-gradient-conic from-transparent via-white/20 to-transparent opacity-60"></div>
-
-            {/* CDのトラック線 */}
-            {Array.from({ length: CONFIG.cd.trackCount }).map((_, i) => {
-              const offset = CONFIG.cd.trackOffset + i * CONFIG.cd.trackSpacing;
-              return (
-                <div
-                  key={i}
-                  className="absolute border border-gray-400/30 rounded-full"
-                  style={{
-                    top: offset,
-                    left: offset,
-                    right: offset,
-                    bottom: offset,
-                  }}
-                ></div>
-              );
-            })}
+            <nav className="w-full flex flex-col items-center justify-center gap-6">
+              <div className="h-[10px]"></div> {/* マージン用div */}
+              {GAMES.map((game, index) => {
+                return (
+                  <div
+                    key={index}
+                    className={`game-card relative shadow-lg font-shin-retro font-bold shrink-0 ${
+                      highlitedApp === game ? "scale-110" : "scale-100"
+                    }`}
+                    onClick={() => handleAppClick(game)}
+                    onMouseEnter={() => setHightlitedApp(game)}
+                  >
+                    <h3 className="absolute left-24 text-center font-bold text-xl">
+                      {game.title}
+                    </h3>
+                    <div
+                      className="absolute top-0 left-6 w-8 h-full flex items-center"
+                      style={{
+                        backgroundColor: game.color ? game.color : "white",
+                      }}
+                    >
+                      {game.icon && (
+                        <img src={game.icon} alt={game.title}></img>
+                      )}
+                    </div>
+                    <div
+                      className="absolute top-0 left-16 w-2 h-full"
+                      style={{
+                        backgroundColor: game.color ? game.color : "white",
+                      }}
+                    ></div>
+                  </div>
+                );
+              })}
+              <div className="h-[50px]"></div> {/* マージン用div */}
+            </nav>
           </div>
         </div>
       </div>
 
-      {/* ジャケット */}
-      <div
-        className={`absolute top-0 left-0 h-[95vh] w-[15vh] bg-white rounded-r-md z-100 mt-[2.5vh] transition-all duration-300 ease-in-out ${
-          selectedApp ? "-translate-x-[100%]" : "translate-x-0"
-        }`}
-        onClick={() => setSelectedApp(null)}
-      ></div>
-
-      {/* ゲーム選択 */}
-      <div
-        className={`absolute top-0 left-0 z-10 flex items-center justify-center w-full h-[100vh] duration-300 transition-opacity ${
-          selectedApp ? "opacity-0" : "opacity-100"
-        }`}
-      >
-        <nav className="w-full h-[100vh] pl-[65vh] flex flex-col items-center justify-center gap-6 py-6">
-          {apps.map((app, index) => {
-            return (
-              <div
-                key={index}
-                className="game-card relative shadow-lg font-shin-retro font-bold"
-                onClick={() => handleAppClick(app)}
-              >
-                <h3 className="absolute left-24 text-center font-bold text-xl">
-                  {app.title}
-                </h3>
-                <div
-                  className="absolute top-0 left-6 w-8 h-full flex items-center"
-                  style={{
-                    backgroundColor: app.color ? app.color : "white",
-                  }}
-                >
-                  {app.icon && <img src={app.icon} alt={app.title}></img>}
-                </div>
-                <div
-                  className="absolute top-0 left-16 w-2 h-full"
-                  style={{
-                    backgroundColor: app.color ? app.color : "white",
-                  }}
-                ></div>
-              </div>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* 詳細 */}
+      {/* ゲーム詳細画面 */}
       {selectedApp && (
         <div
           className={`absolute top-0 left-0 z-10 w-full h-[100vh] duration-300 transition-opacity ${
@@ -229,22 +196,25 @@ const CDLauncher: React.FC = () => {
                 </h1>
                 <h4 className="text-xl">{selectedApp.describe}</h4>
               </header>
-              <main className="flex-1 flex flex-col justify-between w-full">
-                <div className="w-full">
+              <main className="flex-1 flex flex-col justify-between w-full overflow-x-hidden">
+                <div className="w-full max-h-[60vh] ">
                   <h2 className="text-3xl font-bold">遊び方</h2>
                   <pre className="font-shin-retro">{selectedApp.usage}</pre>
                 </div>
                 <div className="flex gap-6">
                   <button
                     className="launch-button"
-                    // isLoadingがtrueの間はボタンを無効化する
-                    disabled={isLoading}
+                    disabled={isAppLoading || isAppRunning}
                     onClick={() =>
                       invokeApp(selectedApp.exePath + selectedApp.exeFileName)
                     }
                   >
                     {/* isLoading中はテキストを変更 */}
-                    {isLoading ? "起動中" : "起動する"}
+                    {isAppRunning
+                      ? "実行中"
+                      : isAppLoading
+                      ? "ロード中..."
+                      : "起動する"}
                   </button>
                   <button
                     className="back-button"

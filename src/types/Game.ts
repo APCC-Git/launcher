@@ -1,4 +1,4 @@
-export type App = {
+export type Game = {
   title: string;
   exeFileName: string;
   exePath: string;
