@@ -1,5 +1,7 @@
 import type { Game } from "../types/Game";
 
+// note: バックエンドではapps/${path}と解釈されるのでexePathにapps/は含めないでください
+
 export const GAMES: Game[] = [
   {
     title: "マインスイーパー",
@@ -35,9 +37,11 @@ export const GAMES: Game[] = [
 ジャンプ: Space
 ジェットパック: Space2回押し
 ポーズ: Tab
+
+※ DirectX 11以上に対応したGPUが必要です
     `,
     icon: "/icon/shooting.png",
-    color: "limegreen",
+    color: "#9694ff",
   },
   {
     title: "escape",
@@ -53,25 +57,6 @@ export const GAMES: Game[] = [
     color: "#f54263",
   },
   {
-    title: "落ちもの",
-    exeFileName: "otimono_simple.exe",
-    exePath: "落ちもの/otimono_simple/",
-    thumbnail: "/thumbnail/otimono.png",
-    describe: "どこかで見たことあるような、落ちものパズルです",
-    usage: `Aボタン：ホールド
-Sボタン：左回転
-Dボタン：右回転
-↑：一気に落ちるやつ
-←：左に移動
-↓：一段落とす
-→：右に移動
-下のほうにあるピース：ホールド中のピース
-右のほうにあるピース：(灰色のピース:今降っているピース(blachout))
-それ以外：次以降降ってくるピース`,
-    icon: "/icon/otimono.png",
-    color: "#ec42f5",
-  },
-  {
     title: "EQUALIZE",
     exeFileName: "equalize.exe",
     exePath: "EQUALIZE/",
@@ -85,5 +70,61 @@ Dボタン：右回転
 5ステージすべてをクリアすると、ゲームクリアです。`,
     icon: "/icon/equalize.png",
     color: "#00ff99",
+  },
+  {
+    title: "落ちもの",
+    exeFileName: "otimono_simple.exe",
+    exePath: "落ちもの/otimono_simple/",
+    thumbnail: "/thumbnail/otimono.png",
+    describe: "どこかで見たことあるような、落ちものパズルです",
+    usage: `Aボタン：ホールド
+Sボタン：左回転
+Dボタン：右回転
+↑：一気に落ちるやつ
+←：左に移動
+↓：一段落とす
+→：右に移動
+下のほうにあるピース：ホールド中のピース
+それ以外：次以降降ってくるピース`,
+    icon: "/icon/otimono.png",
+    color: "#ec42f5",
+  },
+  {
+    title: "落ちもの - BlackOut",
+    exeFileName: "otimono_blackout.exe",
+    exePath: "落ちもの/otimono_blackout/",
+    thumbnail: "/thumbnail/otimono.png",
+    describe: "定期的に暗くなるので、Wボタン連打で明るくしてください。",
+    usage: `Aボタン：ホールド
+Sボタン：左回転
+Dボタン：右回転
+Wボタン: 連打で明るさ回復
+↑：一気に落ちるやつ
+←：左に移動
+↓：一段落とす
+→：右に移動
+下のほうにあるピース：ホールド中のピース
+右のほうにあるピース：(灰色のピース:今降っているピース)
+それ以外：次以降降ってくるピース`,
+    icon: "/icon/otimono.png",
+    color: "#ff66bd",
+  },
+  {
+    title: "落ちもの - Anki",
+    exeFileName: "otimono_anki.exe",
+    exePath: "落ちもの/otimono_anki/",
+    thumbnail: "/thumbnail/otimono.png",
+    describe: "部分的に見えなくなります",
+    usage: `Aボタン：ホールド
+Sボタン：左回転
+Dボタン：右回転
+↑：一気に落ちるやつ
+←：左に移動
+↓：一段落とす
+→：右に移動
+下のほうにあるピース：ホールド中のピース
+それ以外：次以降降ってくるピース`,
+    icon: "/icon/otimono.png",
+    color: "#fff766",
   },
 ];
