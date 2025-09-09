@@ -7,7 +7,7 @@ export const GAMES: Game[] = [
     title: "マインスイーパー",
     exeFileName: "マインスイーパー.exe",
     exePath: "マインスイーパー/",
-    thumbnail: "/thumbnail/minesweeper.png",
+    // thumbnail: "/thumbnail/minesweeper.png",
     describe:
       "隠された地雷の位置を推理しながら、安全なマスを開けていくパズルゲームです",
     usage: `左クリック：マスを開けます。
@@ -26,7 +26,7 @@ export const GAMES: Game[] = [
     title: "シューティング",
     exeFileName: "ShootingGame.exe",
     exePath: "Shooting/Build_exe/",
-    thumbnail: "/thumbnail/shooting.png",
+    // thumbnail: "/thumbnail/shooting.png",
     describe:
       "タイムアタックのシューティングゲームです。すべての敵を倒すまでの時間を競います。",
     usage: `移動: WASD
@@ -47,7 +47,7 @@ export const GAMES: Game[] = [
     title: "escape",
     exeFileName: "main.exe",
     exePath: "escape/escape/",
-    thumbnail: "/thumbnail/escape.png",
+    // thumbnail: "/thumbnail/escape.png",
     describe: "逃げるゲームです",
     usage: `上/下/左/右キーで迫ってくる敵から逃げてください。
 自分は青、敵は赤です。
@@ -60,7 +60,7 @@ export const GAMES: Game[] = [
     title: "EQUALIZE",
     exeFileName: "equalize.exe",
     exePath: "EQUALIZE/",
-    thumbnail: "/thumbnail/otimono.png",
+    // thumbnail: "/thumbnail/otimono.png",
     describe: "数字や記号を選んで数式を完成させるパズルゲームです。",
     usage: `マスは、上下左右に隣接したマスのみ選択できます。
 各ステージで指定された数だけマスを選びましょう。
@@ -72,10 +72,21 @@ export const GAMES: Game[] = [
     color: "#00ff99",
   },
   {
+    title: "ezyZip",
+    exeFileName: "hsptmp.exe",
+    exePath: "ezyZip/",
+    // thumbnail: "/thumbnail/otimono.png",
+    describe: "シンプルなブロック崩しです",
+    usage: `左/右キーでパドルを動かせます。
+ブロックにボールを当ててすべて消したらゲームクリアです。`,
+    icon: "/icon/block.png",
+    color: "#6be9ff",
+  },
+  {
     title: "落ちもの",
     exeFileName: "otimono_simple.exe",
     exePath: "落ちもの/otimono_simple/",
-    thumbnail: "/thumbnail/otimono.png",
+    // thumbnail: "/thumbnail/otimono.png",
     describe: "どこかで見たことあるような、落ちものパズルです",
     usage: `Aボタン：ホールド
 Sボタン：左回転
@@ -93,7 +104,7 @@ Dボタン：右回転
     title: "落ちもの - BlackOut",
     exeFileName: "otimono_blackout.exe",
     exePath: "落ちもの/otimono_blackout/",
-    thumbnail: "/thumbnail/otimono.png",
+    // thumbnail: "/thumbnail/otimono.png",
     describe: "定期的に暗くなるので、Wボタン連打で明るくしてください。",
     usage: `Aボタン：ホールド
 Sボタン：左回転
@@ -113,7 +124,7 @@ Wボタン: 連打で明るさ回復
     title: "落ちもの - Anki",
     exeFileName: "otimono_anki.exe",
     exePath: "落ちもの/otimono_anki/",
-    thumbnail: "/thumbnail/otimono.png",
+    // thumbnail: "/thumbnail/otimono.png",
     describe: "部分的に見えなくなります",
     usage: `Aボタン：ホールド
 Sボタン：左回転
