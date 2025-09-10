@@ -72,7 +72,7 @@ export const GAMES: Game[] = [
     color: "#00ff99",
   },
   {
-    title: "ezyZip",
+    title: "ブロック崩し",
     exeFileName: "hsptmp.exe",
     exePath: "ezyZip/",
     // thumbnail: "/thumbnail/otimono.png",

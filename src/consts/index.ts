@@ -13,13 +13,13 @@ const LAUNCHER_CONFIG = {
   dialogShowDuration: 5000, // エラーメッセージを表示する時間 (ms)
   cd: {
     // 表示するCDの設定
-    image: "/CD.jpg", // CDのジャケット画像
+    image: "/CD.png", // CDのジャケット画像
     diameterVH: 90, // CDの直径 (vh)
     outlineWithVH: 2, // CDの外枠の透明部分の幅 (vh)
     rotationSpeed: 0.5, // スクロールに対する回転倍率
     holeSize: 120, // 中央の穴の直径 (px)
     innerHoleSize: 80, // 内側の穴の直径 (px)
-    trackCount: 10, // トラックの本数
+    trackCount: 5, // トラックの本数
     trackOffset: 15, // 最初のトラックまでの距離 (px)
     trackSpacing: 8, // トラック間隔 (px)
     spinWhileRunning: false, // アプリ実行中に回転するかどうか
